@@ -1,0 +1,97 @@
+{
+  "users": [
+    {
+      "chat_id": 1234567,
+      "tasks": "all",
+      "admin": true
+    },
+    {
+      "chat_id": 234567,
+      "tasks": [
+        "HelloWorld"
+      ]
+    }
+  ],
+  "proc_title": "telegramchat",
+  "flask_api_address": "0.0.0.0:4212",
+  "bot_token": "YOUR:BOT_TOKEN",
+  "chat_style": "rkm",
+  "init_msg": [
+    "TelegramBot has started",
+    "Hello, World!"
+  ],
+  "greetings": [
+    "Hello please select a task",
+    "These are available task"
+  ],
+  "tasks": {
+    "HelloWorld": {
+      "desc": "It will print texts",
+      "alias": "Hello",
+      "singleton": true,
+      "max_column": 2,
+      "functions": [
+        {
+          "function": "hello_user"
+        },
+        {
+          "function": "hello_world"
+        },
+        {
+          "function": "hello",
+          "alias": "say hello"
+        },
+        {
+          "function": "hi_world"
+        },
+        {
+          "function": "bonjour"
+        },
+        {
+          "function": "hello_extra"
+        }
+      ]
+    },
+    "ExtraExample": {
+      "functions": [
+        {
+          "function": "no_reply_on_task_done"
+        },
+        {
+          "function": "reply_to_users_directly"
+        },
+        {
+          "function": "reply_to_users_directly_alt"
+        },
+        {
+          "function": "reply_directly_to_admins"
+        }
+      ]
+    },
+    "SimpleClass": {
+      "functions": [
+        {
+          "function": "hi"
+        }
+      ]
+    },
+    "TimeConsumingTask": {
+      "functions": [
+        {
+          "function": "run_in_a_thread"
+        }
+      ]
+    },
+    "CpuBoundTask": {
+      "functions": [
+        {
+          "function": "run_in_a_process"
+        },
+        {
+          "function": "run_in_a_thread"
+        }
+      ]
+    }
+  }
+}
+

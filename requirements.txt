@@ -1,0 +1,7 @@
+python-telegram-bot
+Flask
+uvicorn
+asgiref
+pathos
+requests
+setproctitle
