@@ -10,5 +10,5 @@ export PYTHONPATH="${PYTHONPATH}:${file_dir}"
 echo $PYTHONPATH
 
 
-./env/bin/python3 ./telegrampy/extras/telegrampy_monitor.py
+./env/bin/python3 ./telegrampy/extras/monitor_telegrampy.py
 
