@@ -12,7 +12,7 @@ from telegrampy.constants.text_constants import TEXT_STATUS, TEXT_MSG, TEXT_POST
 from telegrampy.models.flask_message import FlaskMessage
 from telegrampy.models.meta_data import MetaData
 from telegrampy.util.log_util import getlogger
-from telegrampy.util.util import get_ip
+from telegrampy.util.util import get_ip, verify_flask_hmac_request_auth
 
 logger = getlogger(__name__, logging.DEBUG)
 
@@ -24,6 +24,13 @@ class FlaskServer:
         self._event_loop = event_loop
         self._flask_app = Flask(__name__)
         self._register()
+        self._flag_check_request_origin_ip: bool = configuration.allowed_ip_addresses is not None
+        self._allowed_ip_addresses = configuration.allowed_ip_addresses
+
+        self._flag_check_hmac_auth_signature: bool = configuration.flask_hmac_auth_key is not None
+        self._flask_hmac_auth_key = configuration.flask_hmac_auth_key
+        self._hmac_request_validity_ms: int = configuration.hmac_request_validity_ms
+
         pass
 
     def _register(self):
@@ -31,6 +38,23 @@ class FlaskServer:
         @self._flask_app.route(TEXT_SLASH_UPDATE, methods=[TEXT_POST_CAP])
         @self._flask_app.route(TEXT_SLASH_UPDATE_SLASH, methods=[TEXT_POST_CAP])
         async def custom_updates():
+            # check the origin ip is from valid one
+            if self._flag_check_request_origin_ip:
+                client_ip = request.remote_addr
+                if client_ip not in self._allowed_ip_addresses:
+                    logger.error(f"Forbidden api call from  \"{client_ip}\"")
+                    return jsonify({TEXT_STATUS: False, "message": "Forbidden"}), HTTPStatus.FORBIDDEN
+                pass
+
+            # check if signature is valid
+            if self._flag_check_hmac_auth_signature:
+                auth_status, json_response, response_status, log_message = verify_flask_hmac_request_auth(request.headers, self._flask_hmac_auth_key, self._hmac_request_validity_ms)
+                if not auth_status:
+                    logger.error(log_message)
+                    return json_response, response_status
+                pass
+            # A valid message received
+
             if request.is_json:
                 try:
                     self._callback(FlaskMessage(request.get_json()))

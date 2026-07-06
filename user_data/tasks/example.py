@@ -39,7 +39,7 @@ class HelloWorld:
         return TaskCompletelyDone(f"We have said \"Hello {args[0]} {args[1]}\"")
 
     def bonjour(self):
-        # this function cannot be called as it is not declared in the config.json
+        # this function cannot be called as it is not declared in the config.jsonc
         print("bonjour")
         return TaskDone("say \"bonjour\"")
 

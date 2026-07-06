@@ -5,3 +5,4 @@ asgiref
 pathos
 requests
 setproctitle
+jsonc-parser

@@ -1,11 +1,19 @@
+import hashlib
+import hmac
 import inspect
+import os
 import socket
+import time
 from datetime import datetime
-from typing import List
+from http import HTTPStatus
+from typing import List, Set, Tuple, MutableMapping
 
+from flask import Response, jsonify
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, \
     ReplyKeyboardRemove
 from telegram._utils.types import ReplyMarkup
+
+from telegrampy.constants.text_constants import TEXT_STATUS, TEXT_MSG
 
 
 def get_formatted_datetime() -> str:
@@ -75,7 +83,7 @@ def inline_keyboard_button_maker(opt: str):
     return InlineKeyboardButton(opt, callback_data=opt)
 
 
-def make_inline_keyboard_markup(options: List[str],*args) -> ReplyMarkup:
+def make_inline_keyboard_markup(options: List[str], *args) -> ReplyMarkup:
     # max word count per row is 35
     # for s in options:
     #     print(
@@ -178,3 +186,98 @@ def query_message_wrapper(message: str) -> str:
 
 def do_nothing_message_wrapper(message: str) -> str:
     return message
+
+
+def get_this_device_local_ip_addresses() -> Set[str]:
+    local_ips: Set[str] = {
+        "127.0.0.1",
+    }
+    if os.name != "posix":
+        import socket
+
+        hostname = socket.gethostname()
+        try:
+            # Add all IPv4 addresses assigned to this host
+            for info in socket.getaddrinfo(hostname, None, socket.AF_INET):
+                local_ips.add(info[4][0])
+        except socket.gaierror:
+            pass
+
+        return local_ips
+    else:
+
+        import socket
+        import fcntl
+        import struct
+        import array
+        max_interfaces = 128
+        bytes_ = max_interfaces * 32
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        names = array.array('B', b'\0' * bytes_)
+
+        outbytes = struct.unpack(
+            'iL',
+            fcntl.ioctl(
+                sock.fileno(),
+                0x8912,  # SIOCGIFCONF
+                struct.pack('iL', bytes_, names.buffer_info()[0])
+            )
+        )[0]
+
+        names_as_str = names.tobytes()
+
+        for i in range(0, outbytes, 40):
+            ip = socket.inet_ntoa(names_as_str[i + 20:i + 24])
+            local_ips.add(ip)
+
+        return local_ips
+
+
+def verify_flask_hmac_request_auth(request_headers, hmac_auth_key: bytes, validity_milli_sec: int) -> Tuple[bool, Response | None, int, str]:
+    timestamp_header = request_headers.get("Request-Timestamp")
+    authorization_header = request_headers.get("Authorization")
+
+    if not timestamp_header or not authorization_header:
+        return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Missing headers"}), HTTPStatus.BAD_REQUEST, "Missing headers"
+
+    try:
+        # Expected format:
+        # Authorization: HMAC-SHA256 <signature>
+        parts = authorization_header.split(" ", 1)
+
+        if len(parts) != 2 or parts[0] != "HMAC-SHA256":
+            return False, jsonify({TEXT_STATUS: False, "msg": "Invalid authorization format"}), HTTPStatus.UNAUTHORIZED, "Invalid authorization format"
+        client_signature = parts[1]
+    except Exception as e:
+        return False, jsonify({TEXT_STATUS: False, "msg": "Invalid authorization header"}), HTTPStatus.UNAUTHORIZED, f"Invalid authorization header: {str(e)}"
+
+    # Check timestamp freshness (prevent replay attacks)
+    try:
+        current_time = int(time.time() * 1000)
+        ts = int(timestamp_header)
+        if ts > current_time + validity_milli_sec:  # 3 sec window
+            return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Request auth token invalid"}), HTTPStatus.UNAUTHORIZED, "Request auth token too early"
+        if current_time - ts > validity_milli_sec:  # 3 sec window
+            return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Request auth token expired"}), HTTPStatus.UNAUTHORIZED, "Request auth token expired"
+    except Exception as e:
+        return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Invalid timestamp"}), HTTPStatus.BAD_REQUEST, f"Invalid timestamp: {str(e)}"
+    # Verify signature
+    expected_signature = hmac.new(hmac_auth_key, timestamp_header.encode("utf-8"), hashlib.sha256).hexdigest()
+
+    # Compare hashes securely
+    if not hmac.compare_digest(expected_signature, client_signature):
+        return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Unauthorized"}), HTTPStatus.UNAUTHORIZED, "Unauthorized"
+
+    return True, None, HTTPStatus.OK, "Authorized"
+
+
+def add_hmac_headers(headers: MutableMapping[str, str], hmac_auth_key: bytes) -> None:
+    """
+    Add HMAC authentication headers to an existing headers mapping.
+    """
+    timestamp = str(int(time.time() * 1000))
+
+    signature = hmac.new(hmac_auth_key, timestamp.encode("utf-8"), hashlib.sha256).hexdigest()
+    headers["Request-Timestamp"] = timestamp
+    headers["Authorization"] = f"HMAC-SHA256 {signature}"

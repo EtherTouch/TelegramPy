@@ -1,5 +1,6 @@
 {
   "users": [
+    /* List of Telegram chat IDs and permissions */
     {
       "chat_id": 1234567,
       "tasks": "all",
@@ -12,25 +13,45 @@
       ]
     }
   ],
+  // Process name shown in system tools (ps, htop)
   "proc_title": "telegramchat",
+  // Bind address and port for Flask server
   "flask_api_address": "0.0.0.0:4212",
+  // These are the IP addresses allowed in the API. Delete this to allow any IP addresses
+  "flask_api_allowed_ip": [
+    "localhost"
+  ],
+  // Secret key used for HMAC signing
+  "flask_hmac_auth_key": "SomeSecretKey",
+  // Max allowed request age in milliseconds
+  "hmac_request_validity_ms": 5000,
+  // Telegram Bot API token (keep secret!)
   "bot_token": "YOUR:BOT_TOKEN",
+  // Keyboard type:: rkm or ikm
   "chat_style": "rkm",
   "init_msg": [
+    // Messages printed/logged when bot starts
     "TelegramBot has started",
     "Hello, World!"
   ],
   "greetings": [
+    // Sent when a chat session begins
     "Hello please select a task",
     "These are available task"
   ],
   "tasks": {
+    // tasks
     "HelloWorld": {
+      // Description of task
       "desc": "It will print texts",
+      // Display name in UI (instead of key)
       "alias": "Hello",
+      // If true: same instance shared across all users
       "singleton": true,
+      // Max button columns in keyboard UI
       "max_column": 2,
       "functions": [
+        // List of fuctions
         {
           "function": "hello_user"
         },
@@ -39,6 +60,7 @@
         },
         {
           "function": "hello",
+          // Custom label for UI button
           "alias": "say hello"
         },
         {
@@ -93,5 +115,6 @@
       ]
     }
   }
+  /*end of "tasks"*/
 }
 

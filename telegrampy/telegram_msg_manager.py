@@ -4,11 +4,11 @@ from typing import List
 
 from telegram import Update, Message, InlineKeyboardMarkup, CallbackQuery
 from telegram.ext import ContextTypes, Application
-from telegrampy.models.telegrampy_app import TelegramPyApp
 
 from telegrampy.constants.text_constants import TEXT_REPLY_MARKUP, TEXT_TEXT
 from telegrampy.conversation_handler.conversation_handler import ConversationHandler
 from telegrampy.models.flask_message import FlaskMessage
+from telegrampy.models.telegrampy_app import TelegramPyApp
 from telegrampy.util.authorisation_util import check_authorisation
 from telegrampy.util.log_util import getlogger
 from telegrampy.util.util import query_message_wrapper
@@ -92,7 +92,7 @@ class TelegramMsgManager:
     async def eqit_query_message(self, message_id: int, chat_id: int, message: str):
         # replace some characters
         # message = message.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`")
-        message = message.replace("*", "\\*").replace("`", "\\`")
+        # message = message.replace("*", "\\*").replace("`", "\\`")
         # get the curent reply markup
         reply = await self._conversation_handler.reply_maker.get_reply(chat_id)
         _cor = self._application.bot.edit_message_text(
@@ -111,7 +111,7 @@ class TelegramMsgManager:
     def send_message(self, chat_id: int, message: str):
         # replace some characters
         # message = message.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`")
-        message = message.replace("*", "\\*").replace("`", "\\`")
+        # message = message.replace("*", "\\*").replace("`", "\\`")
 
         _cor = self._application.bot.send_message(
             chat_id,
@@ -127,7 +127,7 @@ class TelegramMsgManager:
     def send_message_to_chat_ids(self, chat_ids: List[int], message: str):
         # replace some characters
         # message = message.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`")
-        message = message.replace("*", "\\*").replace("`", "\\`")
+        # message = message.replace("*", "\\*").replace("`", "\\`")
 
         has_event_loop = True
         try:

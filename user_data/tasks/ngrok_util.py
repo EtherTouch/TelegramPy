@@ -118,7 +118,7 @@ class NgrokUtil:
 
 
 """
-Add this Json file in config.json
+Add this Json file in config.jsonc
 
   "tasks": {
     "NgrokUtil": {

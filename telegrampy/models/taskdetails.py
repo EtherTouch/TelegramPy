@@ -3,7 +3,7 @@ import inspect
 import logging
 from typing import Dict
 
-from telegrampy.constants.text_constants import TEXT_MAX_CULUMN
+from telegrampy.constants.text_constants import TEXT_MAX_COLUMN
 from telegrampy.executor.executor_helper import ExecutorHelper
 from telegrampy.models.task_function import TaskFunction
 from telegrampy.models.telegrampy_app import TelegramPyApp
@@ -21,7 +21,7 @@ class TaskDetails:
         self._telegram_py_app = telegram_py_app
         self._task_description = task_json["desc"] if "desc" in task_json else self._name
         self._task_alias_name = task_json["alias"] if "alias" in task_json else None
-        self._max_keyboard_coulumn = task_json[TEXT_MAX_CULUMN] if TEXT_MAX_CULUMN in task_json else None
+        self._max_keyboard_coulumn = task_json[TEXT_MAX_COLUMN] if TEXT_MAX_COLUMN in task_json else None
         # if it is not singleton we will call the class for each user id
         self._is_singleton = task_json["singleton"] if "singleton" in task_json else False
         self._common_name_functions: Dict[str, TaskFunction] = {}
