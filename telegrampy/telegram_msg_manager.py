@@ -46,14 +46,21 @@ class TelegramMsgManager:
                 update.message.chat_id,
                 update.message.text,
                 context)
+            result: Message | None = None
             if len(reply[TEXT_TEXT]) > 0:
-                result: Message = await self._application.bot.send_message(
-                    chat_id=chat_id, **reply
-                )
+                try:
+                    result: Message = await self._application.bot.send_message(
+                        chat_id=chat_id, **reply
+                    )
+                except Exception as e:
+                    logger.error(f"{str(e)} | [ChatID > {chat_id}]")
+                    return
+                pass
             # lets store the message id if the reply markup is empty
             reply_markup: InlineKeyboardMarkup = reply[TEXT_REPLY_MARKUP]
             if isinstance(reply_markup, InlineKeyboardMarkup) and len(reply_markup.inline_keyboard) != 0:
-                self._conversation_handler.latest_query_msg_ids[chat_id] = result.message_id
+                if result is not None:
+                    self._conversation_handler.latest_query_msg_ids[chat_id] = result.message_id
         elif update.callback_query is not None:
             query: CallbackQuery = update.callback_query
             chat_id = query.from_user.id
@@ -108,12 +115,19 @@ class TelegramMsgManager:
             asyncio.run_coroutine_threadsafe(_cor, self._telegram_py_app.event_loop)
             return
 
+    async def _safe_send_to_bot(self, chat_id, message):
+        try:
+            await self._application.bot.send_message(chat_id, message)
+        except Exception as e:
+            logger.error(f"{str(e)} | [ChatID > {chat_id}]")
+            pass
+
     def send_message(self, chat_id: int, message: str):
         # replace some characters
         # message = message.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`")
         # message = message.replace("*", "\\*").replace("`", "\\`")
 
-        _cor = self._application.bot.send_message(
+        _cor = self._safe_send_to_bot(
             chat_id,
             message
         )
@@ -136,7 +150,7 @@ class TelegramMsgManager:
             has_event_loop = False
 
         for chat_id in chat_ids:
-            _cor = self._application.bot.send_message(
+            _cor = self._safe_send_to_bot(
                 chat_id,
                 message
             )
