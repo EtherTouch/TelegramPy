@@ -11,12 +11,13 @@ from telegrampy.flask_server import FlaskServer
 from telegrampy.models.telegrampy_app import TelegramPyApp
 from telegrampy.telegram_msg_manager import TelegramMsgManager
 from telegrampy.util.log_util import getlogger
+from telegrampy.util.util import generate_proc_title
 
 logger = getlogger(__name__, logging.DEBUG)
 
 if __name__ == '__main__':
     configuration: Configuration = Configuration()
-    setproctitle(f"python {configuration.proc_title}")
+    setproctitle(generate_proc_title(configuration))
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
@@ -35,7 +36,7 @@ if __name__ == '__main__':
         application.add_handler(MessageHandler(filters.TEXT, telegram_bot_wrapper.unauth_handle_telegram_update_msg))
         application.add_handler(CallbackQueryHandler(telegram_bot_wrapper.unauth_handle_telegram_update_msg))
     elif configuration.chat_style == TEXT_RKM:
-        # Dont register CallbackQueryHandler if style is TEXT_CMD
+        # Donot register CallbackQueryHandler if style is TEXT_RKM
         application.add_handler(MessageHandler(filters.TEXT, telegram_bot_wrapper.unauth_handle_telegram_update_msg))
 
     # lets make flask server app

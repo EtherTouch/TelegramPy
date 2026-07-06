@@ -6,3 +6,4 @@ pathos
 requests
 setproctitle
 jsonc-parser
+psutil

@@ -16,6 +16,10 @@ from telegram._utils.types import ReplyMarkup
 from telegrampy.constants.text_constants import TEXT_STATUS, TEXT_MSG
 
 
+def generate_proc_title(configuration):
+    return f"python {configuration.proc_title}"
+
+
 def get_formatted_datetime() -> str:
     # Get the current date and time
     now = datetime.now()
