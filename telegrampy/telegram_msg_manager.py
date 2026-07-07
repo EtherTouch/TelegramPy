@@ -47,16 +47,18 @@ class TelegramMsgManager:
                 update.message.text,
                 context)
             result: Message | None = None
-            if len(reply[TEXT_TEXT]) > 0:
+            msg_len = len(reply[TEXT_TEXT])
+            if msg_len > 0:
                 try:
-                    result: Message = await self._application.bot.send_message(
-                        chat_id=chat_id, **reply
-                    )
+                    result: Message = await self._telegram_py_app.application_bot_send_message(chat_id=chat_id, **reply)
                 except Exception as e:
                     logger.error(f"{str(e)} | [ChatID > {chat_id}]")
                     return
                 pass
-            # lets store the message id if the reply markup is empty
+            elif msg_len == 0:
+                self._telegram_py_app.add_pending_keyboard_markup(chat_id, reply[TEXT_REPLY_MARKUP])
+                pass
+            # let's store the message id if the reply markup is empty
             reply_markup: InlineKeyboardMarkup = reply[TEXT_REPLY_MARKUP]
             if isinstance(reply_markup, InlineKeyboardMarkup) and len(reply_markup.inline_keyboard) != 0:
                 if result is not None:
@@ -115,9 +117,9 @@ class TelegramMsgManager:
             asyncio.run_coroutine_threadsafe(_cor, self._telegram_py_app.event_loop)
             return
 
-    async def _safe_send_to_bot(self, chat_id, message):
+    async def _safe_send_to_bot(self, chat_id, text):
         try:
-            await self._application.bot.send_message(chat_id, message)
+            await self._telegram_py_app.application_bot_send_message(chat_id=chat_id, text=text)
         except Exception as e:
             logger.error(f"{str(e)} | [ChatID > {chat_id}]")
             pass

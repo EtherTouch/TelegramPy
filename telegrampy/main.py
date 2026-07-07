@@ -28,6 +28,7 @@ if __name__ == '__main__':
 
     # Let's make telegram bot application
     application = Application.builder().token(configuration.bot_token).build()
+    telegram_py_app.set_application(application)
     telegram_bot_wrapper = TelegramMsgManager(application, telegram_py_app)
     telegram_py_app.set_telegram_msg_manager(telegram_bot_wrapper)
 
@@ -36,7 +37,7 @@ if __name__ == '__main__':
         application.add_handler(MessageHandler(filters.TEXT, telegram_bot_wrapper.unauth_handle_telegram_update_msg))
         application.add_handler(CallbackQueryHandler(telegram_bot_wrapper.unauth_handle_telegram_update_msg))
     elif configuration.chat_style == TEXT_RKM:
-        # Donot register CallbackQueryHandler if style is TEXT_RKM
+        # Don't register CallbackQueryHandler if style is TEXT_RKM
         application.add_handler(MessageHandler(filters.TEXT, telegram_bot_wrapper.unauth_handle_telegram_update_msg))
 
     # lets make flask server app
