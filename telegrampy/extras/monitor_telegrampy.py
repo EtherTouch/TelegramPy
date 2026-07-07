@@ -8,7 +8,6 @@ from queue import Empty
 import requests
 
 from telegrampy.configuration import Configuration
-from telegrampy.constants.text_constants import TEXT_STATUS
 from telegrampy.util.log_util import getlogger
 
 # This script is intended for Raspberry Pi OS only. It monitors TelegramPy
@@ -25,7 +24,7 @@ def _worker(url: str, queue: Queue):
             return
 
         data = response.json()
-        queue.put((True, data.get(TEXT_STATUS) is True))
+        queue.put((True, data.get("status") is True))
 
     except Exception as e:
         queue.put((False, str(e)))

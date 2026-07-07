@@ -7,7 +7,7 @@ from asgiref.wsgi import WsgiToAsgi
 from flask import Flask, request, jsonify
 
 from telegrampy.configuration import Configuration
-from telegrampy.constants.text_constants import TEXT_STATUS, TEXT_MSG, TEXT_POST_CAP, TEXT_SLASH_UPDATE, \
+from telegrampy.constants.text_constants import TEXT_POST_CAP, TEXT_SLASH_UPDATE, \
     TEXT_SLASH_UPDATE_SLASH, TEXT_SLASH_STATUS, TEXT_SLASH_STATUS_SLASH, TEXT_GET_CAP
 from telegrampy.models.flask_message import FlaskMessage
 from telegrampy.models.meta_data import MetaData
@@ -43,7 +43,7 @@ class FlaskServer:
                 client_ip = request.remote_addr
                 if client_ip not in self._allowed_ip_addresses:
                     logger.error(f"Forbidden api call from  \"{client_ip}\"")
-                    return jsonify({TEXT_STATUS: False, "message": "Forbidden"}), HTTPStatus.FORBIDDEN
+                    return jsonify({"status": False, "message": "Forbidden"}), HTTPStatus.FORBIDDEN
                 pass
 
             # check if signature is valid
@@ -58,18 +58,18 @@ class FlaskServer:
             if request.is_json:
                 try:
                     self._callback(FlaskMessage(request.get_json()))
-                    return jsonify({TEXT_STATUS: True}), HTTPStatus.OK
+                    return jsonify({"status": True}), HTTPStatus.OK
                 except Exception as e:
                     return jsonify(
-                        {TEXT_STATUS: False, TEXT_MSG: f"{e.__class__.__name__}: {str(e)}"}
+                        {"status": False, "msg": f"{e.__class__.__name__}: {str(e)}"}
                     ), HTTPStatus.BAD_REQUEST
             else:
-                return jsonify({TEXT_STATUS: False, TEXT_MSG: f"got a non json data"}), HTTPStatus.BAD_REQUEST
+                return jsonify({"status": False, "msg": f"got a non json data"}), HTTPStatus.BAD_REQUEST
 
         @self._flask_app.route(TEXT_SLASH_STATUS, methods=[TEXT_GET_CAP])
         @self._flask_app.route(TEXT_SLASH_STATUS_SLASH, methods=[TEXT_GET_CAP])
         async def status():
-            return jsonify({TEXT_STATUS: True}), HTTPStatus.OK
+            return jsonify({"status": True}), HTTPStatus.OK
 
     def serve(self):
         webserver = uvicorn.Server(

@@ -13,8 +13,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton,
     ReplyKeyboardRemove
 from telegram._utils.types import ReplyMarkup
 
-from telegrampy.constants.text_constants import TEXT_STATUS, TEXT_MSG
-
 
 def generate_proc_title(configuration):
     return f"python {configuration.proc_title}"
@@ -243,7 +241,7 @@ def verify_flask_hmac_request_auth(request_headers, hmac_auth_key: bytes, validi
     authorization_header = request_headers.get("Authorization")
 
     if not timestamp_header or not authorization_header:
-        return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Missing headers"}), HTTPStatus.BAD_REQUEST, "Missing headers"
+        return False, jsonify({"status": False, "msg": "Missing headers"}), HTTPStatus.BAD_REQUEST, "Missing headers"
 
     try:
         # Expected format:
@@ -251,27 +249,27 @@ def verify_flask_hmac_request_auth(request_headers, hmac_auth_key: bytes, validi
         parts = authorization_header.split(" ", 1)
 
         if len(parts) != 2 or parts[0] != "HMAC-SHA256":
-            return False, jsonify({TEXT_STATUS: False, "msg": "Invalid authorization format"}), HTTPStatus.UNAUTHORIZED, "Invalid authorization format"
+            return False, jsonify({"status": False, "msg": "Invalid authorization format"}), HTTPStatus.UNAUTHORIZED, "Invalid authorization format"
         client_signature = parts[1]
     except Exception as e:
-        return False, jsonify({TEXT_STATUS: False, "msg": "Invalid authorization header"}), HTTPStatus.UNAUTHORIZED, f"Invalid authorization header: {str(e)}"
+        return False, jsonify({"status": False, "msg": "Invalid authorization header"}), HTTPStatus.UNAUTHORIZED, f"Invalid authorization header: {str(e)}"
 
     # Check timestamp freshness (prevent replay attacks)
     try:
         current_time = int(time.time() * 1000)
         ts = int(timestamp_header)
         if ts > current_time + validity_milli_sec:  # 3 sec window
-            return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Request auth token invalid"}), HTTPStatus.UNAUTHORIZED, "Request auth token too early"
+            return False, jsonify({"status": False, "msg": "Request auth token invalid"}), HTTPStatus.UNAUTHORIZED, "Request auth token too early"
         if current_time - ts > validity_milli_sec:  # 3 sec window
-            return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Request auth token expired"}), HTTPStatus.UNAUTHORIZED, "Request auth token expired"
+            return False, jsonify({"status": False, "msg": "Request auth token expired"}), HTTPStatus.UNAUTHORIZED, "Request auth token expired"
     except Exception as e:
-        return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Invalid timestamp"}), HTTPStatus.BAD_REQUEST, f"Invalid timestamp: {str(e)}"
+        return False, jsonify({"status": False, "msg": "Invalid timestamp"}), HTTPStatus.BAD_REQUEST, f"Invalid timestamp: {str(e)}"
     # Verify signature
     expected_signature = hmac.new(hmac_auth_key, timestamp_header.encode("utf-8"), hashlib.sha256).hexdigest()
 
     # Compare hashes securely
     if not hmac.compare_digest(expected_signature, client_signature):
-        return False, jsonify({TEXT_STATUS: False, TEXT_MSG: "Unauthorized"}), HTTPStatus.UNAUTHORIZED, "Unauthorized"
+        return False, jsonify({"status": False, "msg": "Unauthorized"}), HTTPStatus.UNAUTHORIZED, "Unauthorized"
 
     return True, None, HTTPStatus.OK, "Authorized"
 
