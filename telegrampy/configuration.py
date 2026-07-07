@@ -1,7 +1,7 @@
 import random
 from typing import Dict, List, Union, Set
 
-from jsonc_parser.parser import JsoncParser
+import json5
 
 from telegrampy.constants.file_constants import DEFAULT_CONFIG_JSON
 from telegrampy.constants.text_constants import TEXT_TASK_S, TEXT_USER_S, TEXT_FLASK_API_ADDRESS, TEXT_BOT_TOKEN, TEXT_GREETING_S, TEXT_CHAT_STYLE, TEXT_RKM, TEXT_IKM, TEXT_INIT_MSG, TEXT_PROC_TITLE, TEXT_FLASK_API_ALLOWED_IP, TEXT_LOCALHOST, TEXT_FLASK_HMAC_AUTH_KEY, TEXT_HMAC_REQUEST_VALIDITY_MS
@@ -17,8 +17,8 @@ class Configuration:
         if config_file is None:
             config_file = DEFAULT_CONFIG_JSON
         with open(config_file, "r", encoding="utf-8") as reader:
-            self._config_json = JsoncParser.parse_str(reader.read())
-            # TODO Check config jsonc is a valid config jsonc
+            self._config_json = json5.load(reader)
+            # TODO Check config json5 is a valid config json5
 
         # lets parse other fields
         self._flask_ip_port: IpPort = IpPort(self._config_json[TEXT_FLASK_API_ADDRESS])

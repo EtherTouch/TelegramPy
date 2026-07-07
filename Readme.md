@@ -10,7 +10,7 @@ execute specific Python functions. Using TelegramPy provides a convenient way to
 ## Configuration
 
 Python scripts intended for execution are stored separately in `./user_data/tasks` folder. Configuration details are
-stored in `./user_data/config.jsonc`, which includes:
+stored in `./user_data/config.json5`, which includes:
 
 - **users**: Defines different users by their `chat_id`. Only messages received from these `chat_id` will be
   executed. Each user object contains `chat_id`, `task` (a list of tasks available to the user; if set to "all", all
@@ -37,9 +37,9 @@ stored in `./user_data/config.jsonc`, which includes:
 
 1. Clone the repository:
 
-2. Update the `bot_token` in `config.jsonc` with your Telegram bot token.
+2. Update the `bot_token` in `config.json5` with your Telegram bot token.
 
-3. Add your `chat_id` to the `users` section in `config.jsonc`.
+3. Add your `chat_id` to the `users` section in `config.json5`.
 
 4. Install dependencies listed in `requirements.txt`.
 

@@ -5,5 +5,5 @@ asgiref
 pathos
 requests
 setproctitle
-jsonc-parser
+json5
 psutil
